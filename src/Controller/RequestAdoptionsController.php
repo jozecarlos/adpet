@@ -35,9 +35,12 @@ class RequestAdoptionsController extends AppController {
     {
         $adoptionsRequestTable = TableRegistry::getTableLocator()->get('RequestAdoptions');
         $results = $adoptionsRequestTable->find()->where(['pet_id' => $petId])->all();
-        $withMore = $adoptionsRequestTable->loadInto($results, ['Pets', 'Users']);
-
-        $this->set('adoptions', $withMore);
+        if($results->count() > 0):
+           $withMore = $adoptionsRequestTable->loadInto($results, ['Pets', 'Users']);
+           $this->set('adoptions', $withMore);
+        else:
+            $this->set('adoptions', $results);
+        endif;
     }
 
     public function view($id)

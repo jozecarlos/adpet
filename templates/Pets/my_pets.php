@@ -24,9 +24,11 @@
                 'url' => ['action' => 'view',  $pet->id]
             ]); ?>
             <div class="views">
-                <?= $this->Html->link('Pedidos: '.$requestAdoptionsCount,
-                    ['controller' => 'RequestAdoptions', 'action' => 'index', $pet->id]) ?>
-                - Visualizações: <?= $pet->views ?>
+                <?php if ($requestAdoptionsCount > 0): ?>
+                    <?= $this->Html->link('Pedidos: '.$requestAdoptionsCount,
+                        ['controller' => 'RequestAdoptions', 'action' => 'index', $pet->id]) ?> -
+                <?php endif; ?>
+                Visualizações: <?= $pet->views ?>
             </div>
             <div class="box">
                 <h3><strong><?= $this->Html->link( h($pet->name), ['action' => 'view', $pet->id]) ?></strong></h3>

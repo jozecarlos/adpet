@@ -68,16 +68,13 @@ class CreatePets extends AbstractMigration
                 'null' => true,
             ]);
 
-            $table->addColumn('breed_id', 'integer', [
-                'default' => null,
-                'null' => true,
-            ]);
+            $table->addColumn('family_id', 'integer');
+            $table->addForeignKey('family_id', 'families', 'id');
+
+            $table->addColumn('breed_id', 'integer');
             $table->addForeignKey('breed_id', 'breeds', 'id');
 
-            $table->addColumn('user_id', 'integer',[
-                'default' => null,
-                'null' => true,
-            ]);
+            $table->addColumn('user_id', 'integer');
             $table->addForeignKey('user_id', 'users', 'id');
 
 

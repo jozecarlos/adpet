@@ -18,7 +18,7 @@ declare(strict_types=1);
 /*
  * Configure paths required to find CakePHP + general filepath constants
  */
-require __DIR__ . '/paths.php';
+require __DIR__ . DIRECTORY_SEPARATOR . 'paths.php';
 
 /*
  * Bootstrap CakePHP.
@@ -34,6 +34,8 @@ require CORE_PATH . 'config' . DS . 'bootstrap.php';
 use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
+use Cake\Database\TypeFactory;
+use Cake\Database\Type\StringType;
 use Cake\Datasource\ConnectionManager;
 use Cake\Error\ConsoleErrorHandler;
 use Cake\Error\ErrorHandler;
@@ -83,7 +85,7 @@ try {
 
 /*
  * Load an environment local configuration file to provide overrides to your configuration.
- * Notice: For security reasons app_local.php will not be included in your git repo.
+ * Notice: For security reasons app_local.php **should not** be included in your git repo.
  */
 if (file_exists(CONFIG . 'app_local.php')) {
     Configure::load('app_local', 'default');
@@ -131,7 +133,7 @@ if ($isCli) {
  * Include the CLI bootstrap overrides.
  */
 if ($isCli) {
-    require __DIR__ . '/bootstrap_cli.php';
+    require CONFIG . 'bootstrap_cli.php';
 }
 
 /*
@@ -187,22 +189,25 @@ ServerRequest::addDetector('tablet', function ($request) {
  * locale specific date formats. For details see
  * @link https://book.cakephp.org/4/en/core-libraries/internationalization-and-localization.html#parsing-localized-datetime-data
  */
-// TypeFactory::build('time')
+// \Cake\Database\TypeFactory::build('time')
 //    ->useMutable();
-// TypeFactory::build('date')
+// \Cake\Database\TypeFactory::build('date')
 //    ->useMutable();
-// TypeFactory::build('datetime')
+// \Cake\Database\TypeFactory::build('datetime')
 //    ->useMutable();
-// TypeFactory::build('timestamp')
+// \Cake\Database\TypeFactory::build('timestamp')
 //    ->useMutable();
-// TypeFactory::build('datetimefractional')
+// \Cake\Database\TypeFactory::build('datetimefractional')
 //    ->useMutable();
-// TypeFactory::build('timestampfractional')
+// \Cake\Database\TypeFactory::build('timestampfractional')
 //    ->useMutable();
-// TypeFactory::build('datetimetimezone')
+// \Cake\Database\TypeFactory::build('datetimetimezone')
 //    ->useMutable();
-// TypeFactory::build('timestamptimezone')
+// \Cake\Database\TypeFactory::build('timestamptimezone')
 //    ->useMutable();
+
+// There is no time-specific type in Cake
+TypeFactory::map('time', StringType::class);
 
 /*
  * Custom Inflector rules, can be set to correctly pluralize or singularize
@@ -212,4 +217,3 @@ ServerRequest::addDetector('tablet', function ($request) {
 //Inflector::rules('plural', ['/^(inflect)or$/i' => '\1ables']);
 //Inflector::rules('irregular', ['red' => 'redlings']);
 //Inflector::rules('uninflected', ['dontinflectme']);
-//Inflector::rules('transliteration', ['/å/' => 'aa']);

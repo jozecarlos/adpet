@@ -16,18 +16,24 @@ declare(strict_types=1);
  */
 namespace App;
 
+use Cake\Core\Configure;
+use Cake\Core\ContainerInterface;
+use Cake\Core\Exception\MissingPluginException;
+use Cake\Datasource\FactoryLocator;
+use Cake\Error\Middleware\ErrorHandlerMiddleware;
+use Cake\Http\BaseApplication;
+use Cake\Http\Middleware\BodyParserMiddleware;
+use Cake\Http\Middleware\CsrfProtectionMiddleware;
+use Cake\Http\MiddlewareQueue;
+use Cake\ORM\Locator\TableLocator;
+use Cake\Routing\Middleware\AssetMiddleware;
+use Cake\Routing\Middleware\RoutingMiddleware;
+use Psr\Http\Message\ServerRequestInterface;
+
 use Authentication\AuthenticationService;
 use Authentication\AuthenticationServiceInterface;
 use Authentication\AuthenticationServiceProviderInterface;
 use Authentication\Middleware\AuthenticationMiddleware;
-use Cake\Core\Configure;
-use Cake\Core\Exception\MissingPluginException;
-use Cake\Error\Middleware\ErrorHandlerMiddleware;
-use Cake\Http\BaseApplication;
-use Cake\Http\MiddlewareQueue;
-use Cake\Routing\Middleware\AssetMiddleware;
-use Cake\Routing\Middleware\RoutingMiddleware;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Application setup class.
@@ -49,6 +55,11 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
 
         if (PHP_SAPI === 'cli') {
             $this->bootstrapCli();
+        } else {
+            FactoryLocator::add(
+                'Table',
+                (new TableLocator())->allowFallbackClass(false)
+            );
         }
 
         /*
@@ -60,7 +71,6 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         }
 
         // Load more plugins here
-        $this->addPlugin('Josegonzalez/Upload', ['bootstrap' => true]);
         $this->addPlugin('Authentication');
     }
 
@@ -91,29 +101,31 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
             // using it's second constructor argument:
             // `new RoutingMiddleware($this, '_cake_routes_')`
             ->add(new RoutingMiddleware($this))
-            ->add($authentication);
+
+            // Parse various types of encoded request bodies so that they are
+            // available as array through $request->getData()
+            // https://book.cakephp.org/4/en/controllers/middleware.html#body-parser-middleware
+            ->add(new BodyParserMiddleware())
+
+            // Cross Site Request Forgery (CSRF) Protection Middleware
+            // https://book.cakephp.org/4/en/controllers/middleware.html#cross-site-request-forgery-csrf-middleware
+           // ->add(new CsrfProtectionMiddleware([
+           //     'httponly' => true,
+           // ]))
+            ->add($authentication);;
 
         return $middlewareQueue;
     }
 
     /**
-     * Bootrapping for CLI application.
+     * Register application container services.
      *
-     * That is when running commands.
-     *
+     * @param \Cake\Core\ContainerInterface $container The Container to update.
      * @return void
+     * @link https://book.cakephp.org/4/en/development/dependency-injection.html#dependency-injection
      */
-    protected function bootstrapCli(): void
+    public function services(ContainerInterface $container): void
     {
-        try {
-            $this->addPlugin('Bake');
-        } catch (MissingPluginException $e) {
-            // Do not halt if the plugin is missing
-        }
-
-        $this->addPlugin('Migrations');
-
-        // Load more plugins here
     }
 
     /**
@@ -143,5 +155,25 @@ class Application extends BaseApplication implements AuthenticationServiceProvid
         $service->loadIdentifier('Authentication.Password', compact('fields'));
 
         return $service;
+    }
+
+    /**
+     * Bootstrapping for CLI application.
+     *
+     * That is when running commands.
+     *
+     * @return void
+     */
+    protected function bootstrapCli(): void
+    {
+        try {
+            $this->addPlugin('Bake');
+        } catch (MissingPluginException $e) {
+            // Do not halt if the plugin is missing
+        }
+
+        $this->addPlugin('Migrations');
+
+        // Load more plugins here
     }
 }

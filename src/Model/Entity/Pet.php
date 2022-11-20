@@ -8,8 +8,12 @@ class Pet extends Entity
 {
     protected function _getAge()
     {
-        if (!empty($this->_properties['birthday'])) {
-            return (intval(date('Y', time() - strtotime($this->_properties['birthday']))) - 1970) + 1;
+        return $this->calcularIdade($this->birthday);
+    }
+
+    private function calcularIdade( $dataDeNascimento ){
+        if (!empty($dataDeNascimento)) {
+            return (intval(date('Y', time() - strtotime($dataDeNascimento))) - 1970) + 1;
         }
         return 'Sem idade definida - 0 ';
     }

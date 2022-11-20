@@ -7,7 +7,7 @@
  * different URLs to chosen controllers and their actions (functions).
  *
  * It's loaded within the context of `Application::routes()` method which
- * receives a `RouteBuilder` instance `$builder` as method argument.
+ * receives a `RouteBuilder` instance `$routes` as method argument.
  *
  * CakePHP(tm) : Rapid Development Framework (https://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
@@ -21,7 +21,6 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-use Cake\Http\Middleware\CsrfProtectionMiddleware;
 use Cake\Routing\Route\DashedRoute;
 use Cake\Routing\RouteBuilder;
 
@@ -46,21 +45,7 @@ use Cake\Routing\RouteBuilder;
 $routes->setRouteClass(DashedRoute::class);
 
 $routes->scope('/', function (RouteBuilder $builder) {
-    // Register scoped middleware for in scopes.
-    $builder->registerMiddleware('csrf', new CsrfProtectionMiddleware([
-        'httpOnly' => true,
-    ]));
 
-    /*
-    * Apply a middleware to the current route scope.
-    * Requires middleware to be registered through `Application::routes()` with `registerMiddleware()`
-    */
-    $builder->applyMiddleware('csrf');
-
-    /*
-     * Apply a middleware to the current route scope.
-     * Requires middleware to be registered through `Application::routes()` with `registerMiddleware()`
-     */
     $builder->connect('/', ['controller' => 'Pets', 'action' => 'index']);
     $builder->connect('/pet/:id', ['controller' => 'Pets', 'action' => 'view'],['pass' => ['id'],'id' => '[0-9]+']);
     $builder->connect('/search', ['controller' => 'Pets', 'action' => 'search']);
@@ -74,7 +59,6 @@ $routes->scope('/', function (RouteBuilder $builder) {
     $builder->connect('/login', ['controller' => 'Users', 'action' => 'login']);
     $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
     $builder->connect('/registration', ['controller' => 'Users', 'action' => 'add']);
-
 
     /*
      * Connect catchall routes for all controllers.
@@ -97,8 +81,12 @@ $routes->scope('/', function (RouteBuilder $builder) {
  * open new scope and define routes there.
  *
  * ```
- * $builder->scope('/api', function (RouteBuilder $builder) {
+ * $routes->scope('/api', function (RouteBuilder $builder) {
  *     // No $builder->applyMiddleware() here.
+ *
+ *     // Parse specified extensions from URLs
+ *     // $builder->setExtensions(['json', 'xml']);
+ *
  *     // Connect API actions here.
  * });
  * ```

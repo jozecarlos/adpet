@@ -13,12 +13,7 @@ class UsersTable extends  Table {
 
         $this->hasOne('Addresses');
         $this->addBehavior('Timestamp');
-
-        $this->addBehavior('Josegonzalez/Upload.Upload', [
-            'profile_picture',
-        ]);
     }
-
 
 
     public function validationDefault(Validator $validator): Validator

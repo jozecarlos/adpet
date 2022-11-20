@@ -201,7 +201,7 @@ class PetsController extends AppController
             ->where(['user_id =' => $this->Authentication->getIdentity()->id]);
 
         $requestAdoptions = $requestAdoptionsTable->find()
-            ->where(['pet_id IN' => $petsTable->find()->extract('id')->toArray()]);
+            ->where(['pet_id IN' => $pets->extract('id')->toArray()]);
 
         $this->set('pets', $pets->all());;
         $this->set('requestAdoptionsCount', $requestAdoptions->count());
